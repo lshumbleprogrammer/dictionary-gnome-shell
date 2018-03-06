@@ -1,0 +1,7 @@
+{
+  "uuid": "dictionary@lshumbleprogrammer.com",
+  "name": "Dictionary",
+  "description": "Dictionary search for gnome",
+  "url": "https://github.com/lshumbleprogrammer/dictionary-gnome-shell.git",
+  "shell-version": [ "3.26.2" ]
+}
