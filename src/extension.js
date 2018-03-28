@@ -4,6 +4,7 @@
 const St = imports.gi.St;
 const Main = imports.ui.main;
 const Tweener = imports.ui.tweener;
+const Gtk = imports.gi.Gtk;
 
 /******/
 const Lang = imports.lang
@@ -38,7 +39,9 @@ function _showDictionary() {
     dictionaryWord = new CustomLabel.CustomLabel({ style_class: 'dictionary-word dictionary-text', text: 'Teste de palavra'});
     dictionaryPanel.add_actor(dictionaryWord.actor);
 
-    dictionaryView = new St.ScrollView({ hscrollbar_visible: 'false' });
+    dictionaryView = new St.ScrollView({style_class: 'vfade',
+      hscrollbar_policy: Gtk.PolicyType.NEVER,
+      vscrollbar_policy: Gtk.PolicyType.ALWAYS});
     dictionaryPanel.add_actor(dictionaryView);
 
     Main.uiGroup.add_actor(dictionaryPanel);
