@@ -7,10 +7,6 @@
   width: 400px;
 }
 
-.dictionary-title {
-  font-size: 12px;
-}
-
 .dictionary-text {
   margin: 10px;
   color: #ffffff;
@@ -18,6 +14,14 @@
   text-align: left;
 }
 
+.dictionary-title {
+  font-size: 12px;
+}
+
 .dictionary-word {
   font-weight: bold;
+}
+
+.dictionary-meaning {
+  font-size: 20px;
 }

@@ -19,7 +19,7 @@ const Extension = ExtensionUtils.getCurrentExtension();
 const CustomLabel = Extension.imports.CustomLabel;
 
 let dictionaryPanel, dictionaryTitle, dictionaryView,
-  dictionaryWord;
+  dictionaryWord, dictionaryMeaning, meaningPanel;
 
 function _showDictionary() {
   log('[EXTENSION_LOG]', '_showDictionary');
@@ -43,6 +43,9 @@ function _showDictionary() {
       hscrollbar_policy: Gtk.PolicyType.NEVER,
       vscrollbar_policy: Gtk.PolicyType.ALWAYS});
     dictionaryPanel.add_actor(dictionaryView);
+
+    dictionaryMeaning = new CustomLabel.CustomLabel({ style_class: 'dictionary-meaning dictionary-text', text: 'Teste de palavra ieao iiea iea iaeo ieaoieamimdao aou daumd oumd oum dos oumdou rsdil risdiemadm dmeadm ilteao m,/hk/pwiea q/,.h miea ilw çklw ieaoieak /,.kh/t,.w mei kaovekao eaotjkb çu uitasieauie eadm iesadmo iearo sdmi rs  rsdm r esdm resdmao rsedam esdramo risdmeao sdema risedmao sidema o Teste de palavra ieao iiea iea iaeo ieaoieamimdao aou daumd oumd oum dos oumdou rsdil risdiemadm dmeadm ilteao m,/hk/pwiea q/,.h miea ilw çklw ieaoieak /,.kh/t,.w mei kaovekao eaotjkb çu uitasieauie eadm iesadmo iearo sdmi rs  rsdm r esdm resdmao rsedam esdramo risdmeao sdema risedmao sidema o'});
+    dictionaryView.add_actor(dictionaryMeaning.actor);
 
     Main.uiGroup.add_actor(dictionaryPanel);
 
