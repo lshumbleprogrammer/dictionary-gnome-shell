@@ -1,0 +1,23 @@
+
+.dictionary-panel {
+  background-color: rgba(10,10,10,0.7);
+  border-radius: 5px;
+  padding: .5em;
+  height: 400px;
+  width: 400px;
+}
+
+.dictionary-title {
+  font-size: 12px;
+}
+
+.dictionary-text {
+  margin: 10px;
+  color: #ffffff;
+  background-color: rgba(0,0,0,0.0);
+  text-align: left;
+}
+
+.dictionary-word {
+  font-weight: bold;
+}

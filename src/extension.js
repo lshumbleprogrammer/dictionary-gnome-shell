@@ -1,3 +1,6 @@
+
+/* http://mathematicalcoffee.blogspot.com.br/2012/09/gnome-shell-extensions-getting-started.html */
+/* https://www.abidibo.net/blog/2016/03/02/how-i-developed-my-first-gnome-shell-extension/ */
 const St = imports.gi.St;
 const Main = imports.ui.main;
 const Tweener = imports.ui.tweener;
@@ -6,34 +9,61 @@ const Tweener = imports.ui.tweener;
 const Lang = imports.lang
 const Meta = imports.gi.Meta
 const Shell = imports.gi.Shell
+const Pango = imports.gi.Pango;
 /******/
 
-let text, button;
+const ExtensionUtils = imports.misc.extensionUtils;
+const Extension = ExtensionUtils.getCurrentExtension();
 
-// function _hideHello() {
-//     Main.uiGroup.remove_actor(text);
-//     text = null;
-// }
-//
-// function _showHello() {
-//     if (!text) {
-//         text = new St.Label({ style_class: 'helloworld-label', text: "Hello, world!" });
-//         Main.uiGroup.add_actor(text);
-//     }
-//
-//     text.opacity = 255;
-//
-//     let monitor = Main.layout.primaryMonitor;
-//
-//     text.set_position(Math.floor(monitor.width / 2 - text.width / 2),
-//                       Math.floor(monitor.height / 2 - text.height / 2));
-//
-//     Tweener.addTween(text,
-//                      { opacity: 0,
-//                        time: 2,
-//                        transition: 'easeOutQuad',
-//                        onComplete: _hideHello });
-// }
+const CustomLabel = Extension.imports.CustomLabel;
+
+let dictionaryPanel, dictionaryTitle, dictionaryView,
+  dictionaryWord;
+
+function _showDictionary() {
+  log('[EXTENSION_LOG]', '_showDictionary');
+  if (!dictionaryPanel) {
+    dictionaryPanel = new St.BoxLayout({ style_class: 'dictionary-panel', vertical: 'true'});
+
+
+    // dictionaryTitle = new St.Label({ style_class: 'dictionary-title', text: 'Dicionario'});
+    // dictionaryTitle.clutter_text.line_wrap = true;
+    // dictionaryTitle.clutter_text.line_wrap_mode = Pango.WrapMode.WORD;
+    // dictionaryTitle.clutter_text.ellipsize = Pango.EllipsizeMode.NONE;
+    // dictionaryPanel.add_actor(dictionaryTitle);
+
+    dictionaryTitle = new CustomLabel.CustomLabel({ style_class: 'dictionary-title dictionary-text', text: 'Dicionario'});
+    dictionaryPanel.add_actor(dictionaryTitle.actor);
+
+    dictionaryWord = new CustomLabel.CustomLabel({ style_class: 'dictionary-word dictionary-text', text: 'Teste de palavra'});
+    dictionaryPanel.add_actor(dictionaryWord.actor);
+
+    dictionaryView = new St.ScrollView({ hscrollbar_visible: 'false' });
+    dictionaryPanel.add_actor(dictionaryView);
+
+    Main.uiGroup.add_actor(dictionaryPanel);
+
+    let monitor = Main.layoutManager.primaryMonitor;
+
+    dictionaryPanel.set_position(monitor.x + Math.floor(monitor.width / 2 - dictionaryPanel.width / 2),
+    monitor.y + Math.floor(monitor.height / 2 - dictionaryPanel.height / 2));
+  }
+
+  dictionaryPanel.opacity = 255;
+
+  Tweener.addTween(dictionaryPanel,
+                   { opacity: 0,
+                     time: 2,
+                     transition: 'easeOutQuad',
+                     onComplete: _hideDictionary });
+}
+
+function _hideDictionary() {
+  Main.uiGroup.remove_actor(dictionaryPanel);
+  dictionaryPanel = null;
+  dictionaryTitle = null;
+}
+
 function KeyManager() {
     this._init.apply(this, arguments);
 }
@@ -90,37 +120,9 @@ KeyManager.prototype =  {
 
 function enable() {
   log('[EXTENSION_LOG]', 'enable');
-  // button = new St.Bin({ style_class: 'panel-button',
-  //                       reactive: true,
-  //                       can_focus: true,
-  //                       x_fill: true,
-  //                       y_fill: false,
-  //                       track_hover: true });
-  // let icon = new St.Icon({ icon_name: 'system-run',
-  //                          icon_type: St.IconType.SYMBOLIC,
-  //                          style_class: 'system-status-icon' });
-  //
-  // button.set_child(icon);
-  // button.connect('button-press-event', _showHello);
-  // Main.panel._rightBox.insert_actor(button, 0);
+
   let keyManager = new KeyManager()
-  keyManager.listenFor("<ctrl><shift>a", function(){
-    var d = "Hot keys are working!!!";
-    log('[EXTENSION_LOG]', d);
-    global.log(d);
-    Util.spawn(['echo',d]);
-  });
-
-
-  // global.display.connect("key-press-event", (widget, event, user_data) => {
-  //   let [success, keyval] = event.get_keyval(); // integer
-  //   let keyname = Gdk.keyval_name(keyval); // string keyname
-  //
-  //   console.log("Tecla pressionada " + keyname);
-  //   if (keyname === "Control_L") {
-  //     // Dialog code or eg. this.keys_array.push("<Ctrl>");
-  //   }
-  // });
+  keyManager.listenFor("<ctrl><shift>a", _showDictionary);
 }
 
 function disable() {
