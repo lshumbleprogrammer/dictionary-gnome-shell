@@ -5,6 +5,7 @@ const St = imports.gi.St;
 const Main = imports.ui.main;
 const Tweener = imports.ui.tweener;
 const Gtk = imports.gi.Gtk;
+const Mainloop = imports.mainloop;
 
 /******/
 const Lang = imports.lang
@@ -19,13 +20,49 @@ const Extension = ExtensionUtils.getCurrentExtension();
 const CustomLabel = Extension.imports.CustomLabel;
 
 let dictionaryPanel, dictionaryTitle, dictionaryView,
-  dictionaryWord, dictionaryMeaning, meaningPanel;
+  dictionaryWord, dictionaryMeaning, meaningPanel, timeout;
 
-function _showDictionary() {
+let mouseOn = false;
+
+function _getTextAndSearch() {
+  log('[EXTENSION_LOG]', '_getTextAndSearch');
+
+  let clipboard = St.Clipboard.get_default();
+  clipboard.get_text(St.ClipboardType.PRIMARY, Lang.bind(this, function(clipboard, text) {
+    log('[EXTENSION_LOG]', '_getTextAndSearch1');
+    // if(Utils.is_blank(text)) {
+    //   this._dialog.statusbar.add_message(
+    //     'Clipboard is empty.',
+    //     2000,
+    //     StatusBar.MESSAGE_TYPES.error,
+    //     false
+    //   );
+    // }
+
+    _showDictionary(text);
+  }));
+}
+
+function _showDictionary(textToSearch) {
   log('[EXTENSION_LOG]', '_showDictionary');
   if (!dictionaryPanel) {
-    dictionaryPanel = new St.BoxLayout({ style_class: 'dictionary-panel', vertical: 'true'});
+    dictionaryPanel = new St.BoxLayout({ reactive: true, style_class: 'dictionary-panel', vertical: 'true'});
 
+    dictionaryPanel.connect("enter-event", function () {
+      log("enter-event");
+      mouseOn = true;
+    });
+
+    dictionaryPanel.connect("leave-event", function () {
+      mouseOn = false;
+      log("leave-event");
+      // if (dictionaryPanel)
+      //   Tweener.addTween(dictionaryPanel,
+      //                    { opacity: 0,
+      //                      time: 2,
+      //                      transition: 'easeOutQuad',
+      //                      onComplete: _hideDictionary });
+    });
 
     // dictionaryTitle = new St.Label({ style_class: 'dictionary-title', text: 'Dicionario'});
     // dictionaryTitle.clutter_text.line_wrap = true;
@@ -36,7 +73,7 @@ function _showDictionary() {
     dictionaryTitle = new CustomLabel.CustomLabel({ style_class: 'dictionary-title dictionary-text', text: 'Dicionario'});
     dictionaryPanel.add_actor(dictionaryTitle.actor);
 
-    dictionaryWord = new CustomLabel.CustomLabel({ style_class: 'dictionary-word dictionary-text', text: 'Teste de palavra'});
+    dictionaryWord = new CustomLabel.CustomLabel({ style_class: 'dictionary-word dictionary-text', text: textToSearch});
     dictionaryPanel.add_actor(dictionaryWord.actor);
 
     dictionaryView = new St.ScrollView({style_class: 'vfade',
@@ -47,7 +84,8 @@ function _showDictionary() {
     dictionaryMeaning = new CustomLabel.CustomLabel({ style_class: 'dictionary-meaning dictionary-text', text: 'Teste de palavra ieao iiea iea iaeo ieaoieamimdao aou daumd oumd oum dos oumdou rsdil risdiemadm dmeadm ilteao m,/hk/pwiea q/,.h miea ilw çklw ieaoieak /,.kh/t,.w mei kaovekao eaotjkb çu uitasieauie eadm iesadmo iearo sdmi rs  rsdm r esdm resdmao rsedam esdramo risdmeao sdema risedmao sidema o Teste de palavra ieao iiea iea iaeo ieaoieamimdao aou daumd oumd oum dos oumdou rsdil risdiemadm dmeadm ilteao m,/hk/pwiea q/,.h miea ilw çklw ieaoieak /,.kh/t,.w mei kaovekao eaotjkb çu uitasieauie eadm iesadmo iearo sdmi rs  rsdm r esdm resdmao rsedam esdramo risdmeao sdema risedmao sidema o'});
     dictionaryView.add_actor(dictionaryMeaning.actor);
 
-    Main.uiGroup.add_actor(dictionaryPanel);
+    // Main.uiGroup.add_actor(dictionaryPanel);
+    Main.layoutManager.addChrome(dictionaryPanel);
 
     let monitor = Main.layoutManager.primaryMonitor;
 
@@ -57,17 +95,19 @@ function _showDictionary() {
 
   dictionaryPanel.opacity = 255;
 
-  Tweener.addTween(dictionaryPanel,
-                   { opacity: 0,
-                     time: 2,
-                     transition: 'easeOutQuad',
-                     onComplete: _hideDictionary });
+  // Tweener.addTween(dictionaryPanel,
+                  //  { opacity: 0,
+                    //  time: 2,
+                    //  transition: 'easeOutQuad',
+                    //  onComplete: _hideDictionary });
 }
 
 function _hideDictionary() {
-  Main.uiGroup.remove_actor(dictionaryPanel);
-  dictionaryPanel = null;
-  dictionaryTitle = null;
+  if (dictionaryPanel) {
+    Main.uiGroup.remove_actor(dictionaryPanel);
+    dictionaryPanel = null;
+    dictionaryTitle = null;
+  }
 }
 
 function KeyManager() {
@@ -124,15 +164,32 @@ KeyManager.prototype =  {
     }
 }
 
+let focusCaretTracker;
+
 function enable() {
   log('[EXTENSION_LOG]', 'enable');
 
   let keyManager = new KeyManager()
-  keyManager.listenFor("<ctrl><shift>a", _showDictionary);
+  keyManager.listenFor("<ctrl><shift>a", _getTextAndSearch);
+
+  timeout = Mainloop.timeout_add(2000, function () {
+    if (!mouseOn) {
+      _hideDictionary();
+    }
+    return true;
+  });
+}
+
+function updateFocus(caller, event) {
+  log('[EXTENSION_LOG]', 'focus changed');
+}
+
+function onChanged (event) {
+    log(event.source.get_name() + ',' + event.source.get_role_name());
 }
 
 function disable() {
-
+  Mainloop.source_remove(timeout);
 }
 
 function main() {
